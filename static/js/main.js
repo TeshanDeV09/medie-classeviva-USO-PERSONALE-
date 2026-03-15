@@ -32,9 +32,10 @@ function throttle(fn, ms = 1000) {
 }
 function gradeClass(v) {
   if (v === null || v === undefined) return '';
-  if (v >= 7) return 'grade-high';
-  if (v >= 5.5) return 'grade-mid';
-  return 'grade-low';
+  if (v > 8.25)  return 'grade-top';   // sopra 8+ -> blu
+  if (v >= 6)    return 'grade-high';  // da 6 a 8+ -> verde
+  if (v >= 5)    return 'grade-mid';   // da 5 a 6- -> arancione
+  return 'grade-low';                  // sotto 5 -> rosso
 }
 function fmt(v, d = 2) {
   if (v === null || v === undefined || isNaN(v)) return '—';
@@ -113,9 +114,7 @@ function calcolaTutteLeMedie() {
 }
 
 function calcolaSummary(medie) {
-  const votiNum = state.voti.filter(v => 
-    v.valore !== null && v.valore !== undefined && !v.non_fa_media
-  );
+  const votiNum = state.voti.filter(v => v.valore !== null && v.valore !== undefined);
   const p1 = votiNum.filter(v => v.periodo === 1).map(v => v.valore);
   const p2 = votiNum.filter(v => v.periodo === 2).map(v => v.valore);
   const mp1 = p1.length ? p1.reduce((a,b)=>a+b,0)/p1.length : null;
@@ -235,9 +234,10 @@ let chartDonutTot = null;
 
 function donutColor(v) {
   if (v === null || v === undefined) return ['#64748b', '#1e293b'];
-  if (v >= 7)   return ['#10b981', '#064e3b'];
-  if (v >= 5.5) return ['#f59e0b', '#451a03'];
-  return ['#ef4444', '#450a0a'];
+  if (v > 8.25)  return ['#60a5fa', '#1e3a5f'];  // blu (top)
+  if (v >= 6)    return ['#10b981', '#064e3b'];   // verde
+  if (v >= 5)    return ['#f59e0b', '#451a03'];   // arancione
+  return ['#ef4444', '#450a0a'];                  // rosso
 }
 
 function renderDonut(canvasId, chartRef, value, label) {

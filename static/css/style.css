@@ -347,7 +347,7 @@ body {
 }
 
 .student-nome {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: var(--text);
 }
@@ -440,10 +440,13 @@ body {
   color: var(--muted);
 }
 
-/* Grade color coding */
-.grade-high   { color: var(--success); }
-.grade-mid    { color: var(--warning); }
-.grade-low    { color: var(--danger); }
+/* Grade color coding — !important per battere specificita' tabella */
+.grade-top        { color: #60a5fa !important; }
+.grade-high       { color: #10b981 !important; }
+.grade-mid        { color: #f59e0b !important; }
+.grade-low        { color: #ef4444 !important; }
+.grade-lettera    { color: #a78bfa !important; }
+.grade-dettaglio  { color: #60a5fa !important; font-style: italic; }
 
 /* ── Controls Bar ───────────────────────────────────────────────── */
 .controls-bar {
@@ -818,6 +821,25 @@ body {
   color: #64748b;
 }
 
+/* Tema light: sfondo card più visibile */
+[data-theme="light"] .card {
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+
+[data-theme="light"] .section {
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+
+[data-theme="light"] .grade-pill {
+  background: #f8fafc;
+  border-color: rgba(0,0,0,.1);
+}
+
+/* Tema dark: accent card glow */
+[data-theme="dark"] .card-accent {
+  box-shadow: 0 0 20px rgba(59,130,246,.1);
+}
+
 /* ── Utility ────────────────────────────────────────────────────── */
 .hidden  { display: none !important; }
 .sr-only {
@@ -827,4 +849,31 @@ body {
   overflow: hidden;
   clip: rect(0,0,0,0);
   border: 0;
+}
+/* ── Donut summary cards ─────────────────────────────────────────────────── */
+.donut-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: .75rem auto .5rem;
+}
+
+.donut-wrap-lg {
+  width: 150px;
+  height: 150px;
+}
+
+.card-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Rimuovi card-value non più usato nelle summary */
+.card-summary .card-value { display: none; }
+
+@media (max-width: 600px) {
+  .donut-wrap { width: 90px; height: 90px; }
+  .donut-wrap-lg { width: 110px; height: 110px; }
 }

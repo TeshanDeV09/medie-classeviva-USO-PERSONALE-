@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ClasseViva Dashboard – uso personale locale" />
+  <title>ClasseViva Dashboard</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <!-- Chart.js da CDN (locale, nessun tracking) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" 
+          crossorigin="anonymous" defer></script>
+  <script src="/static/js/main.js?v=4" defer></script>
+</head>
+<body>
+
+<!-- ═══════════════════════  HEADER  ═══════════════════════ -->
+<header class="site-header" role="banner">
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="brand-icon" aria-hidden="true">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="var(--accent)"/>
+          <path d="M8 10h16M8 16h10M8 22h13" stroke="white" stroke-width="2.2" 
+                stroke-linecap="round"/>
+          <circle cx="24" cy="22" r="4" fill="white" fill-opacity="0.25" 
+                  stroke="white" stroke-width="1.5"/>
+          <path d="M22.5 22l1 1 2-2" stroke="white" stroke-width="1.5" 
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="brand-title">ClasseViva</h1>
+        <span class="brand-subtitle">Dashboard Voti</span>
+      </div>
+    </div>
+
+    <div class="header-status">
+      <div class="status-indicator" id="statusIndicator" 
+           role="status" aria-live="polite" aria-label="Stato connessione">
+        <span class="status-dot" id="statusDot"></span>
+        <span class="status-text" id="statusText">Caricamento…</span>
+      </div>
+      <span class="last-refresh" id="lastRefresh" aria-label="Ultimo aggiornamento"></span>
+    </div>
+
+    <nav class="header-controls" role="navigation" aria-label="Controlli dashboard">
+      <button class="btn btn-ghost btn-icon" id="btnRefresh" 
+              aria-label="Aggiorna dati" title="Aggiorna dati">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" 
+             stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M23 4v6h-6M1 20v-6h6"/>
+          <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+        </svg>
+      </button>
+
+      <button class="btn btn-ghost btn-icon" id="btnTheme" 
+              aria-label="Cambia tema" title="Dark / Light">
+        <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" 
+             fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" 
+             fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/>
+        </svg>
+      </button>
+
+      <button class="btn btn-primary btn-sm" id="btnExportRaw" aria-label="Esporta CSV voti">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" 
+             stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Esporta
+      </button>
+    </nav>
+  </div>
+</header>
+
+<!-- ═══════════════════════  MAIN  ═══════════════════════ -->
+<main id="main-content" tabindex="-1">
+
+  <!-- Toast notifiche -->
+  <div id="toastContainer" class="toast-container" role="alert" aria-live="assertive"></div>
+
+  <!-- Loader overlay -->
+  <div id="loader" class="loader-overlay" aria-hidden="true">
+    <div class="loader-spinner"></div>
+    <p class="loader-text">Caricamento voti…</p>
+  </div>
+
+  <!-- ── Upload CSV manuale ─────────────────────── -->
+  <section class="upload-banner" id="uploadBanner" aria-label="Carica CSV manuale">
+    <div class="container">
+      <div class="upload-banner-inner">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" 
+             stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <span>Vuoi caricare i tuoi voti da CSV?</span>
+        <label class="btn btn-ghost btn-sm" for="csvUpload">
+          Seleziona file
+          <input type="file" id="csvUpload" accept=".csv" 
+                 style="display:none" aria-label="Seleziona file CSV voti"/>
+        </label>
+        <button class="btn btn-ghost btn-icon btn-xs" id="closeBanner" 
+                aria-label="Chiudi banner upload">✕</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+
+    <!-- ── Studente info ──────────────────────── -->
+    <div class="student-info" id="studentInfo" aria-label="Informazioni studente">
+      <span id="studentNome" class="student-nome">—</span>
+      <span id="studentClasse" class="student-classe" style="display:none"></span>
+      <span class="student-source" id="dataSource"></span>
+    </div>
+
+    <!-- ── Cards riepilogo ───────────────────── -->
+    <section class="summary-cards" aria-label="Riepilogo medie">
+      <article class="card card-summary" id="cardP1" tabindex="0">
+        <div class="card-label">Primo Periodo</div>
+        <div class="donut-wrap">
+          <canvas id="donutP1" aria-label="Media primo periodo" role="img"></canvas>
+        </div>
+        <div class="card-sub" id="nVotiP1"></div>
+      </article>
+
+      <article class="card card-summary card-accent" id="cardTotale" tabindex="0">
+        <div class="card-label">Media Generale</div>
+        <div class="donut-wrap donut-wrap-lg">
+          <canvas id="donutTot" aria-label="Media generale" role="img"></canvas>
+        </div>
+        <div class="card-sub" id="nVotiTot"></div>
+      </article>
+
+      <article class="card card-summary" id="cardP2" tabindex="0">
+        <div class="card-label">Secondo Periodo</div>
+        <div class="donut-wrap">
+          <canvas id="donutP2" aria-label="Media secondo periodo" role="img"></canvas>
+        </div>
+        <div class="card-sub" id="nVotiP2"></div>
+      </article>
+    </section>
+
+    <!-- ── Controlli calcolo ──────────────────── -->
+    <section class="controls-bar" aria-label="Modalità di calcolo">
+      <div class="controls-group">
+        <label for="calcMode" class="controls-label">Modalità calcolo:</label>
+        <select id="calcMode" class="select" aria-label="Modalità di calcolo medie">
+          <option value="arithmetic">Aritmetica semplice</option>
+          <option value="weighted">Pesata per tipologia</option>
+        </select>
+      </div>
+
+      <div class="pesi-panel" id="pesiPanel" hidden aria-hidden="true">
+        <fieldset>
+          <legend class="pesi-legend">Pesi tipologie (somma = 100%)</legend>
+          <div class="pesi-grid">
+            <div class="pesi-item">
+              <label for="pesoScritto">Scritto/Verifica %</label>
+              <input type="number" id="pesoScritto" class="input-num" 
+                     min="0" max="100" value="50" aria-label="Peso scritti"/>
+            </div>
+            <div class="pesi-item">
+              <label for="pesoOrale">Orale %</label>
+              <input type="number" id="pesoOrale" class="input-num" 
+                     min="0" max="100" value="30" aria-label="Peso orali"/>
+            </div>
+            <div class="pesi-item">
+              <label for="pesoPratico">Pratico %</label>
+              <input type="number" id="pesoPratico" class="input-num" 
+                     min="0" max="100" value="20" aria-label="Peso pratici"/>
+            </div>
+          </div>
+          <div class="pesi-total" id="pesiTotal">
+            Totale: <strong id="pesiSum">100</strong>%
+            <span id="pesiWarning" class="pesi-warning" hidden>⚠ La somma deve essere 100!</span>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btnApplyPesi">
+            Applica pesi
+          </button>
+        </fieldset>
+      </div>
+    </section>
+
+    <!-- ── Tabella materie ───────────────────── -->
+    <section class="section" aria-label="Tabella voti per materia">
+      <div class="section-header">
+        <h2 class="section-title">Voti per Materia</h2>
+        <div class="section-actions">
+          <input type="search" id="searchMateria" class="search-input" 
+                 placeholder="Cerca materia…" 
+                 aria-label="Cerca materia nella tabella"/>
+          <button class="btn btn-ghost btn-sm" id="btnExportMedie" 
+                  aria-label="Esporta CSV medie">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" 
+                 stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            CSV Medie
+          </button>
+        </div>
+      </div>
+
+      <div class="table-wrapper" role="region" aria-label="Tabella materie scrollabile" tabindex="0">
+        <table class="grades-table" id="gradesTable">
+          <thead>
+            <tr>
+              <th scope="col" class="sortable" data-col="materia" tabindex="0" 
+                  aria-sort="none">Materia</th>
+              <th scope="col" class="sortable" data-col="p1" tabindex="0" 
+                  aria-sort="none">P1</th>
+              <th scope="col" class="sortable" data-col="p2" tabindex="0" 
+                  aria-sort="none">P2</th>
+              <th scope="col" class="sortable" data-col="media" tabindex="0" 
+                  aria-sort="none">Media</th>
+              <th scope="col"># Voti P1</th>
+              <th scope="col"># Voti P2</th>
+            </tr>
+          </thead>
+          <tbody id="gradesBody">
+            <tr><td colspan="6" class="empty-row">Caricamento…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── Grafici ───────────────────────────── -->
+    <div class="charts-grid">
+
+      <!-- Andamento nel tempo -->
+      <section class="section chart-section" aria-label="Andamento voti nel tempo">
+        <div class="section-header">
+          <h2 class="section-title">Andamento nel Tempo</h2>
+          <select id="filterMateria" class="select select-sm" 
+                  aria-label="Filtra grafico per materia">
+            <option value="all">Tutte le materie</option>
+          </select>
+        </div>
+        <div class="chart-container">
+          <canvas id="chartLine" 
+                  aria-label="Grafico lineare andamento voti" 
+                  role="img"></canvas>
+        </div>
+      </section>
+
+      <!-- Confronto P1 vs P2 -->
+      <section class="section chart-section" aria-label="Confronto primo e secondo periodo">
+        <div class="section-header">
+          <h2 class="section-title">P1 vs P2 per Materia</h2>
+        </div>
+        <div class="chart-container">
+          <canvas id="chartBar" 
+                  aria-label="Grafico a barre confronto periodi" 
+                  role="img"></canvas>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ── Voti recenti ──────────────────────── -->
+    <section class="section" aria-label="Voti recenti">
+      <div class="section-header">
+        <h2 class="section-title">Tutti i Voti</h2>
+        <span class="section-badge" id="totalVotiCount"></span>
+      </div>
+      <div class="recent-grades" id="recentGrades">
+        <!-- Popolato da JS -->
+      </div>
+    </section>
+
+  </div><!-- /container -->
+</main>
+
+<!-- ═══════════════════════  FOOTER  ═══════════════════════ -->
+<footer class="site-footer" role="contentinfo">
+  <div class="container footer-inner">
+    <p class="footer-legal">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" 
+           stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      App ad <strong>uso strettamente personale</strong>.
+      Nessun dato viene condiviso con server esterni.
+      Le credenziali restano nel file <code>.env</code> locale.
+    </p>
+    <p class="footer-version" id="footerVersion">v1.0.0</p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -288,8 +288,22 @@ class ClasseVivaClient:
             pwd_input.send_keys(self.password)
             driver.find_element(By.CSS_SELECTOR, "button[type='submit'], input[type='submit'], .btn-accedi, #accedi").click()
 
-            wait.until(lambda d: "login" not in d.current_url or "menu" in d.current_url or "home" in d.current_url)
+            # Aspetta redirect reale post-login (non rimanga su login.php)
+            try:
+                wait.until(lambda d: "login.php" not in d.current_url)
+            except Exception:
+                # Se timeout, prova a cliccare il bottone accedi con JS
+                logger.warning("Timeout wait login, provo click JS...")
+                try:
+                    driver.execute_script(
+                        "document.querySelector('.accedi, #accedi, button[type=submit]').click()"
+                    )
+                    time.sleep(4)
+                except Exception:
+                    pass
+
             logger.info(f"Login Selenium OK. URL: {driver.current_url}")
+            logger.info(f"Titolo pagina: {driver.title}")
 
             # Estrai classe navigando alla pagina anagrafica studente
             if not getattr(self, "_classe_cache", None):
@@ -446,24 +460,9 @@ class ClasseVivaClient:
             elif soup.find(class_="name"):
                 nome = soup.find(class_="name").get_text(strip=True).title()
 
-            # Classe: usa cache dal menu se disponibile
-            classe = getattr(self, "_classe_cache", "N/A")
-            if classe == "N/A":
-                pass  # Cerca nella pagina voti, usa cid dall'URL del menu
-            classe = "N/A"
-            # La classe a volte appare nel menu o nel profilo studente
-            for el in soup.find_all(string=True):
-                t = str(el).strip()
-                if re.match(r"^[1-5][A-Z]{1,4}$", t) and 2 <= len(t) <= 5:
-                    classe = t
-                    break
-            # Fallback: cerca nel page_title o header
-            if classe == "N/A":
-                header_td = soup.find('td', class_=re.compile(r'page-header'))
-                if header_td:
-                    m = re.search(r"\b([1-5][A-Z]{1,4})\b", header_td.get_text())
-                    if m:
-                        classe = m.group(1)
+            # Classe: usa _classe_cache impostata durante la navigazione
+            classe = getattr(self, "_classe_cache", None) or "N/A"
+            logger.info(f"Classe usata nel dict student: {classe}")
 
             return {
                 "student": {

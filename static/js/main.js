@@ -18,6 +18,9 @@ const state = {
 
 let chartLine = null;
 let chartBar  = null;
+let modalDonutP1    = null;
+let modalDonutP2    = null;
+let modalDonutMedia = null;
 
 const $ = sel => document.querySelector(sel);
 const $$ = sel => [...document.querySelectorAll(sel)];
@@ -114,7 +117,9 @@ function calcolaTutteLeMedie() {
 }
 
 function calcolaSummary(medie) {
-  const votiNum = state.voti.filter(v => v.valore !== null && v.valore !== undefined);
+  const votiNum = state.voti.filter(v =>
+    v.valore !== null && v.valore !== undefined && !v.non_fa_media
+  );
   const p1 = votiNum.filter(v => v.periodo === 1).map(v => v.valore);
   const p2 = votiNum.filter(v => v.periodo === 2).map(v => v.valore);
   const mp1 = p1.length ? p1.reduce((a,b)=>a+b,0)/p1.length : null;
@@ -548,6 +553,66 @@ function updatePesiSum() {
   return tot === 100;
 }
 
+// ── Modal Materia ─────────────────────────────────────────────────────────
+function openMateriaModal(materia) {
+  const medie  = calcolaTutteLeMedie();
+  const dati   = medie[materia];
+  if (!dati) return;
+
+  // Titolo
+  $('#modalTitle').textContent = materia;
+
+  // Donuts
+  modalDonutP1    = renderDonut('#modalDonutP1',    modalDonutP1,    dati.p1,    'P1');
+  modalDonutP2    = renderDonut('#modalDonutP2',    modalDonutP2,    dati.p2,    'P2');
+  modalDonutMedia = renderDonut('#modalDonutMedia', modalDonutMedia, dati.media, 'Media');
+
+  // Lista voti
+  const votiMat = state.voti
+    .filter(v => v.materia === materia && v.data)
+    .sort((a, b) => b.data.localeCompare(a.data));
+
+  const list = $('#modalVotiList');
+  if (!votiMat.length) {
+    list.innerHTML = '<p style="color:var(--muted);font-size:.875rem">Nessun voto.</p>';
+  } else {
+    list.innerHTML = votiMat.map(v => {
+      const hasNum  = v.valore !== null && v.valore !== undefined;
+      const display = hasNum ? v.valore : (v.valore_lettera || '—');
+      const cls     = hasNum
+        ? (v.non_fa_media ? 'grade-dettaglio' : gradeClass(v.valore))
+        : 'grade-lettera';
+      const tipoClean = (v.tipo || '')
+        .replace('scritto/grafico','Scritto').replace('scritto','Scritto')
+        .replace('orale','Orale').replace('pratico','Pratico')
+        .replace('verifica','Verifica').replace('voto test','Test') || 'N/D';
+      const nonFaMedia = v.non_fa_media
+        ? '<span style="color:var(--muted);font-size:.7rem">(non fa media)</span>' : '';
+      return `
+      <div class="modal-voto-row">
+        <div class="modal-voto-val ${cls}">${display}</div>
+        <div class="modal-voto-info">
+          <span class="tipo-badge">${tipoClean}</span>
+          <span class="modal-voto-data">${fmtDate(v.data)}</span>
+          <span class="modal-periodo-badge">P${v.periodo}</span>
+          ${nonFaMedia}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Mostra modal
+  const modal = $('#materiaModal');
+  modal.removeAttribute('hidden');
+  modal.focus();
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  $('#materiaModal').setAttribute('hidden', '');
+  document.body.style.overflow = '';
+}
+
 // ── Init ───────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
@@ -611,4 +676,21 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   $('#closeBanner').addEventListener('click', () => $('#uploadBanner').classList.add('hidden'));
+
+  // Modal materia — chiudi con X o click fuori
+  $('#modalClose').addEventListener('click', closeModal);
+  $('#materiaModal').addEventListener('click', e => {
+    if (e.target === $('#materiaModal')) closeModal();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  // Click su riga tabella apre modal
+  $('#gradesBody').addEventListener('click', e => {
+    const row = e.target.closest('tr');
+    if (!row) return;
+    const materia = row.querySelector('td')?.textContent?.trim();
+    if (materia) openMateriaModal(materia);
+  });
 });

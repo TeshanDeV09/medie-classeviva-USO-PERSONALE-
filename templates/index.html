@@ -288,6 +288,41 @@
   </div><!-- /container -->
 </main>
 
+<!-- ═══════════════════════  MODAL MATERIA  ═══════════════════════ -->
+<div id="materiaModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modalTitle">Materia</h2>
+      <button class="btn btn-ghost btn-icon modal-close" id="modalClose" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Donuts -->
+      <div class="modal-donuts">
+        <div class="modal-donut-item">
+          <div class="modal-donut-wrap-sm">
+            <canvas id="modalDonutP1" role="img" aria-label="Media P1"></canvas>
+          </div>
+          <span class="modal-donut-label">Periodo 1</span>
+        </div>
+        <div class="modal-donut-item modal-donut-main">
+          <div class="modal-donut-wrap-lg">
+            <canvas id="modalDonutMedia" role="img" aria-label="Media generale"></canvas>
+          </div>
+          <span class="modal-donut-label">Media</span>
+        </div>
+        <div class="modal-donut-item">
+          <div class="modal-donut-wrap-sm">
+            <canvas id="modalDonutP2" role="img" aria-label="Media P2"></canvas>
+          </div>
+          <span class="modal-donut-label">Periodo 2</span>
+        </div>
+      </div>
+      <!-- Lista voti -->
+      <div class="modal-voti-list" id="modalVotiList"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════════════  FOOTER  ═══════════════════════ -->
 <footer class="site-footer" role="contentinfo">
   <div class="container footer-inner">

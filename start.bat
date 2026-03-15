@@ -1,8 +1,7 @@
 @echo off
-chcp 65001 >nul
 title ClasseViva Dashboard
 
-:: Verifica che .env esista e abbia le credenziali
+:: Verifica che .env esista
 if not exist ".env" (
     echo [ERRORE] File .env non trovato. Esegui prima setup.bat
     pause
@@ -19,16 +18,15 @@ if not exist "venv\Scripts\activate.bat" (
 :: Attiva venv
 call venv\Scripts\activate.bat
 
-:: Apri browser dopo 3 secondi
+:: Apri browser dopo 4 secondi
 start /b cmd /c "timeout /t 4 /nobreak >nul && start http://127.0.0.1:5000"
 
 echo.
-echo  ╔═══════════════════════════════════════════════════╗
-echo  ║         ClasseViva Dashboard in avvio...          ║
-echo  ║                                                   ║
-echo  ║   Il browser si aprira' automaticamente.          ║
-echo  ║   Per fermare: premi CTRL+C                       ║
-echo  ╚═══════════════════════════════════════════════════╝
+echo =====================================================
+echo    ClasseViva Dashboard in avvio...
+echo    Il browser si apre automaticamente.
+echo    Per fermare: premi CTRL+C
+echo =====================================================
 echo.
 
 python app.py

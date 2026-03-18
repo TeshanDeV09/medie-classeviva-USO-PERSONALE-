@@ -236,6 +236,9 @@ const doRefresh = throttle(async () => {
 let chartDonutP1  = null;
 let chartDonutP2  = null;
 let chartDonutTot = null;
+let chartDonutP1Med  = null;
+let chartDonutP2Med  = null;
+let chartDonutTotMed = null;
 
 function donutColor(v) {
   if (v === null || v === undefined) return ['#64748b', '#1e293b'];
@@ -303,7 +306,7 @@ function renderSummary() {
   const medie = calcolaTutteLeMedie();
   const sum   = calcolaSummary(medie);
 
-  // Donut charts
+  // ── Fronte: media globale per periodo ──────────────────────────────────
   chartDonutP1  = renderDonut('#donutP1',  chartDonutP1,  sum.media_p1,     'P1');
   chartDonutP2  = renderDonut('#donutP2',  chartDonutP2,  sum.media_p2,     'P2');
   chartDonutTot = renderDonut('#donutTot', chartDonutTot, sum.media_totale, 'Tot');
@@ -315,6 +318,27 @@ function renderSummary() {
   $('#nVotiP2').textContent  = p2n ? `${p2n} voti` : '';
   $('#nVotiTot').textContent = vNum.length ? `${vNum.length} voti` : '';
   $('#totalVotiCount').textContent = `${state.voti.length} voti totali`;
+
+  // ── Retro: media delle medie per materia per periodo ──────────────────
+  const medieVals  = Object.values(medie);
+
+  // P1: media delle medie p1 per materia
+  const medieP1 = medieVals.map(m => m.p1).filter(v => v !== null);
+  const mediaMedP1 = medieP1.length ? medieP1.reduce((a,b)=>a+b,0)/medieP1.length : null;
+  chartDonutP1Med = renderDonut('#donutP1Med', chartDonutP1Med, mediaMedP1, 'Med.P1');
+  $('#nMaterieP1').textContent = medieP1.length ? `${medieP1.length} materie` : '';
+
+  // P2: media delle medie p2 per materia
+  const medieP2 = medieVals.map(m => m.p2).filter(v => v !== null);
+  const mediaMedP2 = medieP2.length ? medieP2.reduce((a,b)=>a+b,0)/medieP2.length : null;
+  chartDonutP2Med = renderDonut('#donutP2Med', chartDonutP2Med, mediaMedP2, 'Med.P2');
+  $('#nMaterieP2').textContent = medieP2.length ? `${medieP2.length} materie` : '';
+
+  // Tot: media delle medie generali per materia
+  const medieTot = medieVals.map(m => m.media).filter(v => v !== null);
+  const mediaMedTot = medieTot.length ? medieTot.reduce((a,b)=>a+b,0)/medieTot.length : null;
+  chartDonutTotMed = renderDonut('#donutTotMed', chartDonutTotMed, mediaMedTot, 'Med.Tot');
+  $('#nMaterieTot').textContent = medieTot.length ? `${medieTot.length} materie` : '';
 
   // Benvenuto nome e classe
   const nome   = state.student.nome   || '';
@@ -622,6 +646,17 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#btnRefresh').addEventListener('click', doRefresh);
   $('#btnExportRaw').addEventListener('click', () => exportCSV('raw'));
   $('#btnExportMedie').addEventListener('click', () => exportCSV('medie'));
+
+  // Flip cards — click or Enter/Space to toggle
+  ['cardP1', 'cardTotale', 'cardP2'].forEach(id => {
+    const card = document.getElementById(id);
+    if (!card) return;
+    const toggle = () => card.classList.toggle('flipped');
+    card.addEventListener('click', toggle);
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+    });
+  });
 
   $('#calcMode').addEventListener('change', e => {
     state.calcMode = e.target.value;

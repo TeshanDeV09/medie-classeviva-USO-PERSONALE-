@@ -415,6 +415,57 @@ body {
   border-color: color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
+/* ── Flip card ─────────────────────────────────────────────── */
+.card-flip {
+  perspective: 1000px;
+  cursor: pointer;
+  overflow: visible;
+  user-select: none;
+}
+
+.card-flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 180px;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-flip.flipped .card-flip-inner {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.card-face-back {
+  transform: rotateY(180deg);
+}
+
+/* Hint tooltip on hover */
+.card-flip::after {
+  content: '↺';
+  position: absolute;
+  top: 0.4rem;
+  right: 0.6rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+.card-flip:hover::after { opacity: 1; }
+
 .card-label {
   font-size: .75rem;
   font-weight: 500;

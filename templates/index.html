@@ -9,7 +9,7 @@
   <!-- Chart.js da CDN (locale, nessun tracking) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" 
           crossorigin="anonymous" defer></script>
-  <script src="/static/js/main.js?v=4" defer></script>
+  <script src="/static/js/main.js?v=5" defer></script>
 </head>
 <body>
 
@@ -131,29 +131,73 @@
 
     <!-- ── Cards riepilogo ───────────────────── -->
     <section class="summary-cards" aria-label="Riepilogo medie">
-      <article class="card card-summary" id="cardP1" tabindex="0">
-        <div class="card-label">Primo Periodo</div>
-        <div class="donut-wrap">
-          <canvas id="donutP1" aria-label="Media primo periodo" role="img"></canvas>
+
+      <article class="card card-summary card-flip" id="cardP1" tabindex="0"
+               aria-label="Primo periodo – clicca per vedere media delle medie">
+        <div class="card-flip-inner" id="cardP1Inner">
+          <!-- Fronte: media globale P1 -->
+          <div class="card-face card-face-front">
+            <div class="card-label">Primo Periodo</div>
+            <div class="donut-wrap">
+              <canvas id="donutP1" aria-label="Media primo periodo" role="img"></canvas>
+            </div>
+            <div class="card-sub" id="nVotiP1"></div>
+          </div>
+          <!-- Retro: media delle medie per materia P1 -->
+          <div class="card-face card-face-back">
+            <div class="card-label">Med. Materie P1</div>
+            <div class="donut-wrap">
+              <canvas id="donutP1Med" aria-label="Media delle medie P1" role="img"></canvas>
+            </div>
+            <div class="card-sub" id="nMaterieP1"></div>
+          </div>
         </div>
-        <div class="card-sub" id="nVotiP1"></div>
       </article>
 
-      <article class="card card-summary card-accent" id="cardTotale" tabindex="0">
-        <div class="card-label">Media Generale</div>
-        <div class="donut-wrap donut-wrap-lg">
-          <canvas id="donutTot" aria-label="Media generale" role="img"></canvas>
+      <article class="card card-summary card-accent card-flip" id="cardTotale" tabindex="0"
+               aria-label="Media generale – clicca per vedere media delle medie">
+        <div class="card-flip-inner" id="cardTotaleInner">
+          <!-- Fronte: media generale (tutti i voti) -->
+          <div class="card-face card-face-front">
+            <div class="card-label">Media Generale</div>
+            <div class="donut-wrap donut-wrap-lg">
+              <canvas id="donutTot" aria-label="Media generale" role="img"></canvas>
+            </div>
+            <div class="card-sub" id="nVotiTot"></div>
+          </div>
+          <!-- Retro: media delle medie per materia (totale) -->
+          <div class="card-face card-face-back">
+            <div class="card-label">Media delle Medie</div>
+            <div class="donut-wrap donut-wrap-lg">
+              <canvas id="donutTotMed" aria-label="Media delle medie" role="img"></canvas>
+            </div>
+            <div class="card-sub" id="nMaterieTot"></div>
+          </div>
         </div>
-        <div class="card-sub" id="nVotiTot"></div>
       </article>
 
-      <article class="card card-summary" id="cardP2" tabindex="0">
-        <div class="card-label">Secondo Periodo</div>
-        <div class="donut-wrap">
-          <canvas id="donutP2" aria-label="Media secondo periodo" role="img"></canvas>
+      <article class="card card-summary card-flip" id="cardP2" tabindex="0"
+               aria-label="Secondo periodo – clicca per vedere media delle medie">
+        <div class="card-flip-inner" id="cardP2Inner">
+          <!-- Fronte: media globale P2 -->
+          <div class="card-face card-face-front">
+            <div class="card-label">Secondo Periodo</div>
+            <div class="donut-wrap">
+              <canvas id="donutP2" aria-label="Media secondo periodo" role="img"></canvas>
+            </div>
+            <div class="card-sub" id="nVotiP2"></div>
+          </div>
+          <!-- Retro: media delle medie per materia P2 -->
+          <div class="card-face card-face-back">
+            <div class="card-label">Med. Materie P2</div>
+            <div class="donut-wrap">
+              <canvas id="donutP2Med" aria-label="Media delle medie P2" role="img"></canvas>
+            </div>
+            <div class="card-sub" id="nMaterieP2"></div>
+          </div>
         </div>
-        <div class="card-sub" id="nVotiP2"></div>
       </article>
+
     </section>
 
     <!-- ── Controlli calcolo ──────────────────── -->
